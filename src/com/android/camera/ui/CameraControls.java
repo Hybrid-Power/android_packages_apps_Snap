@@ -462,8 +462,9 @@ public class CameraControls extends RotatableLayout {
     }
 
     public void hideUI() {
+        if(!isAnimating)
+            enableTouch(false);
         isAnimating = true;
-        enableTouch(false);
         int rotation = getUnifiedRotation();
         mFrontBackSwitcher.animate().cancel();
         if(TsMakeupManager.HAS_TS_MAKEUP) {
@@ -548,13 +549,14 @@ public class CameraControls extends RotatableLayout {
                 mPreview.animate().translationXBy(-mSize).setDuration(ANIME_DURATION);
                 break;
         }
-        mRemainingPhotos.setVisibility(View.INVISIBLE);
+        //mRemainingPhotos.setVisibility(View.INVISIBLE);
         mRefocusToast.setVisibility(View.GONE);
     }
 
     public void showUI() {
+        if(!isAnimating)
+            enableTouch(false);
         isAnimating = true;
-        enableTouch(false);
         int rotation = getUnifiedRotation();
         mFrontBackSwitcher.animate().cancel();
         if(TsMakeupManager.HAS_TS_MAKEUP) {
@@ -657,9 +659,9 @@ public class CameraControls extends RotatableLayout {
                 mPreview.animate().translationXBy(mSize).setDuration(ANIME_DURATION);
                 break;
         }
-        if (mRemainingPhotos.getVisibility() == View.INVISIBLE) {
+        /*if (mRemainingPhotos.getVisibility() == View.INVISIBLE) {
             mRemainingPhotos.setVisibility(View.VISIBLE);
-        }
+        }*/
         mRefocusToast.setVisibility(View.GONE);
     }
 
@@ -908,7 +910,7 @@ public class CameraControls extends RotatableLayout {
         View[] views = {
             mSceneModeSwitcher, mFilterModeSwitcher, mFrontBackSwitcher,
             TsMakeupManager.HAS_TS_MAKEUP ? mTsMakeupSwitcher : mHdrSwitcher,
-            mMenu, mShutter, mPreview, mSwitcher
+            mMenu, mPreview, mSwitcher
         };
         for (View v : views) {
             ((RotateImageView) v).setOrientation(orientation, animation);

@@ -30,6 +30,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.Camera;
@@ -237,10 +238,12 @@ public class PhotoUI implements PieListener,
                     int oldBottom) {
                 int width = right - left;
                 int height = bottom - top;
+                boolean isMaxSizeBeingValid = false;
 
                 if (mMaxPreviewWidth == 0 && mMaxPreviewHeight == 0) {
                     mMaxPreviewWidth = width;
                     mMaxPreviewHeight = height;
+                    isMaxSizeBeingValid = true;
                 }
 
                 int orientation = mActivity.getResources().getConfiguration().orientation;
@@ -259,7 +262,7 @@ public class PhotoUI implements PieListener,
                     }
                 }
                 if (mOrientationResize != mPrevOrientationResize
-                        || mAspectRatioResize) {
+                        || mAspectRatioResize || isMaxSizeBeingValid) {
                     layoutPreview(mAspectRatio);
                     mAspectRatioResize = false;
                 }
@@ -444,6 +447,9 @@ public class PhotoUI implements PieListener,
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.v(TAG, "surfaceChanged: width =" + width + ", height = " + height);
+        RectF r = new RectF(mSurfaceView.getLeft(), mSurfaceView.getTop(),
+                mSurfaceView.getRight(), mSurfaceView.getBottom());
+        mController.onPreviewRectChanged(CameraUtil.rectFToRect(r));
     }
 
     @Override
@@ -547,6 +553,7 @@ public class PhotoUI implements PieListener,
         });
         if (mController.isImageCaptureIntent()) {
             hideSwitcher();
+            mSwitcher.setSwitcherVisibility(false);
             ViewGroup cameraControls = (ViewGroup) mRootView.findViewById(R.id.camera_controls);
             mActivity.getLayoutInflater().inflate(R.layout.review_module_control, cameraControls);
 
@@ -608,24 +615,9 @@ public class PhotoUI implements PieListener,
     // called from onResume but only the first time
     public void initializeFirstTime() {
         // Initialize shutter button.
-        mShutterButton.setImageResource(R.drawable.shutter_button_anim);
-        mShutterButton.setOnClickListener(new OnClickListener()
-        {
-            @Override
-            public void onClick(View v) {
-                if (!CameraControls.isAnimating())
-                    doShutterAnimation();
-            }
-        });
-
+        mShutterButton.setImageResource(R.drawable.btn_new_shutter);
         mShutterButton.setOnShutterButtonListener(mController);
         mShutterButton.setVisibility(View.VISIBLE);
-    }
-
-    public void doShutterAnimation() {
-        AnimationDrawable frameAnimation = (AnimationDrawable) mShutterButton.getDrawable();
-        frameAnimation.stop();
-        frameAnimation.start();
     }
 
     // called from onResume every other time
